@@ -1,0 +1,43 @@
+    `timescale 1ns / 1ps
+    
+    module font_rom(
+        input  wire [6:0] ascii,     // ASCII code
+        input  wire [3:0] row,       // row index (0-15)
+        output reg  [7:0] pixels     // 8 pixels (1=fg, 0=bg)
+    );
+    
+        always @(*) begin
+            case (ascii)
+                7'h41: begin // 'A'
+                    case (row)
+                        0:  pixels = 8'b00011000;
+                        1:  pixels = 8'b00100100;
+                        2:  pixels = 8'b01000010;
+                        3:  pixels = 8'b01000010;
+                        4:  pixels = 8'b01111110;
+                        5:  pixels = 8'b01000010;
+                        6:  pixels = 8'b01000010;
+                        7:  pixels = 8'b01000010;
+                        default: pixels = 8'b00000000;
+                    endcase
+                end
+    
+                7'h42: begin // 'B'
+                    case (row)
+                        0:  pixels = 8'b01111100;
+                        1:  pixels = 8'b01000010;
+                        2:  pixels = 8'b01000010;
+                        3:  pixels = 8'b01111100;
+                        4:  pixels = 8'b01000010;
+                        5:  pixels = 8'b01000010;
+                        6:  pixels = 8'b01000010;
+                        7:  pixels = 8'b01111100;
+                        default: pixels = 8'b00000000;
+                    endcase
+                end
+    
+                default: pixels = 8'b00000000; // undefined chars blank
+            endcase
+        end
+    
+    endmodule
