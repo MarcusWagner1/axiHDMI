@@ -1,0 +1,52 @@
+`timescale 1ns / 1ps
+
+module char_rend(
+    input  wire [9:0] px,       // current pixel x
+    input  wire [9:0] py,       // current pixel y
+    input  wire       video_active,
+
+    input  wire [6:0] ascii,    // ASCII char code
+    input  wire [9:0] loc_x,    // top-left X of char
+    input  wire [9:0] loc_y,    // top-left Y of char
+    input  wire [23:0] ch_color,// foreground color
+    input  wire [23:0] bg_color,// background color
+
+    output reg [7:0] red,
+    output reg [7:0] green,
+    output reg [7:0] blue
+);
+
+    // Character cell size (8 wide × 16 tall)
+    localparam CHAR_W = 8;
+    localparam CHAR_H = 16;
+
+    wire [3:0] char_row = py - loc_y;  // current row within char
+    wire [2:0] char_col = px - loc_x;  // current col within char
+
+    reg [7:0] font_row;  // bitmap row fetched from font ROM
+
+    // Instantiate font ROM
+    font_rom font_inst (
+        .ascii(ascii),
+        .row(char_row),
+        .pixels(font_row)
+    );
+
+    always @(*) begin
+        if (!video_active) begin
+            {red, green, blue} = 24'h000000; // black outside active
+        end else if ( (px >= loc_x) && (px < loc_x + CHAR_W) &&
+                      (py >= loc_y) && (py < loc_y + CHAR_H) ) begin
+            // inside bounding box of char
+            if (font_row[7 - char_col]) begin
+                {red, green, blue} = ch_color;  // foreground pixel
+            end else begin
+                {red, green, blue} = bg_color;  // background pixel
+            end
+        end else begin
+            // outside char region ? background
+            {red, green, blue} = bg_color;
+        end
+    end
+
+endmodule
